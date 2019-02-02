@@ -61,3 +61,58 @@ heroku run make console     --app <app_name>
 ActiveRecord::Base.connection.prepared_statements
 => true
 ```
+
+## With database.yml and initializer (`with-initializer` branch of this project)
+### Configuration
+
+Same as above but with this initializer ( `./app/initializers/disable_prepared_statements.rb` ) :
+```
+ActiveRecord::Base.establish_connection(
+  ActiveRecord::Base.remove_connection.merge(
+    :prepared_statements => false
+  )
+)
+```
+
+And add `require` in `app.rb` :
+```
+require 'sinatra'
+require 'sinatra/activerecord'
+require './app/models/text.rb'
+
+set :database_file, "config/database.yml"
+require './app/initializers/disable_prepared_statements.rb'
+
+class App < Sinatra::Base
+  register Sinatra::ActiveRecordExtension
+
+  get "/" do
+    Text.first.content
+  end
+end
+```
+
+### Installation & tests
+
+#### local
+```
+git clone https://github.com/hugobarthelemy/minimal-sinatra-prepared-statements-test.git
+git checkout with-initializer
+bundle install
+rake db:create
+rake db:migrate
+rake db:seed
+make console
+ActiveRecord::Base.connection.prepared_statements
+=> false
+```
+
+### On Heroku
+```
+git push heroku with-initializer:master
+heroku run rake db:migrate  --app <app_name>
+heroku run rake db:seed     --app <app_name>
+heroku run make console     --app <app_name>
+ActiveRecord::Base.connection.prepared_statements
+=> false
+```
