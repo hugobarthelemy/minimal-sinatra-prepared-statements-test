@@ -1,0 +1,19 @@
+DEFAULTS: &DEFAULTS
+  adapter: postgresql
+  encoding: UTF8
+  pool: 5
+  prepared_statements:  false
+
+development:
+  <<: *DEFAULTS
+  database:             database
+  username:             username
+  host:                 host
+
+
+production:
+  <<: *DEFAULTS
+  host:             <%= ENV['DATABASE_HOST'] %>
+  database:         <%= ENV['DATABASE_NAME'] %>
+  username:         <%= ENV['DATABASE_USER'] %>
+  password:         <%= ENV['DATABASE_PASSWORD'] %>
